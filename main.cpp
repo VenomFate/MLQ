@@ -9,7 +9,7 @@ class Proceso{
     string nombre;
     int rafaga; 
     int prioridad;
-    float llegada;
+    float llegada,TT,WT,tiempoActual;
 
     public:
     Proceso(){
@@ -17,6 +17,9 @@ class Proceso{
         this->rafaga = 0;
         this->prioridad = 0;
         this->llegada = 0;
+        this->TT = 0;
+        this->WT = 0;
+        this->tiempoActual = 0;
     }
    
 
@@ -44,6 +47,26 @@ class Proceso{
     float getLlegada(){ 
         return this->llegada;
     }
+    void setTT(float TT){
+        this->TT = TT;
+    }
+    float getTT(){ 
+        return this->TT;
+    }
+    void setWT(float WT){
+        this->WT = WT;
+    }
+    float getWT(){ 
+        return this->WT;
+    }
+    void setTiempoActual(float tiempoActual){
+        this->tiempoActual = tiempoActual;
+    }
+    float getTiempoActual(){ 
+        return this->tiempoActual;
+    }
+    
+
 
 };
 vector<Proceso> CrearProcesos(int n){           //Crea n cantidad de procesos con tiempos aleatorios, con nombres genericos
@@ -66,9 +89,65 @@ void MostrarVector(vector<Proceso> Cola){
         for(int i=0; i <Cola.size();i++){
             cout<<endl<<Cola[i].getNombre()<<endl;
             cout<<"Prioridad:"<<Cola[i].getPrioridad()<<endl;
-            cout<<"Rafaga:"<<Cola[i].getRafaga()<<endl;
+            cout<<"Rafaga remanente:"<<Cola[i].getRafaga()<<endl;
             cout<<"Tiempo De llegada:"<<Cola[i].getLlegada()<<endl;
+            cout<<"WT:"<<Cola[i].getWT()<<endl;
+            cout<<"TT:"<<Cola[i].getTT()<<endl;
+            cout<<"TiempoActual:"<<Cola[i].getTiempoActual()<<endl;
         }
+}
+
+float menorTiempo(vector<Proceso> Cola){
+    float menor=Cola[0].getLlegada();
+    for(int i=0;i<Cola.size();i++){
+        if(Cola[i].getLlegada() < menor)
+        menor = Cola[i].getLlegada();
+    }
+    return menor;
+}
+
+void RoundRobin1(vector<Proceso> Cola){
+    int q1=3;
+    float tiempoSistema=0;
+    float TiempoActual = menorTiempo(Cola);
+    float inicio = menorTiempo(Cola);
+    vector<Proceso> Registro;
+    while(!Cola.empty()){
+        for(int i=0 ; i < Cola.size();i++){
+                
+            if(Cola[i].getLlegada() < TiempoActual){                                                           //si el proceso ya esta dentro del sistema entonces
+
+                if(Cola[i].getRafaga() <= q1){
+                    Cola[i].setWT(tiempoSistema);
+                    tiempoSistema = tiempoSistema + Cola[i].getRafaga();                                                // si la rafaga es mas pequeña que el quantum se suma solo la rafaga remanente y se trabaja con el siguente proceso con un quantum nuevo
+                    Cola[i].setRafaga(0);
+                    Cola[i].setTT(tiempoSistema);
+                    Cola[i].setTiempoActual(tiempoSistema+inicio);
+                    Registro.push_back(Cola[i]);
+
+                }
+                else{
+                    Cola[i].setWT(tiempoSistema);
+                    tiempoSistema = tiempoSistema + q1;
+                    Cola[i].setRafaga(Cola[i].getRafaga()-q1);
+                    Cola[i].setTT(tiempoSistema);
+                    Cola[i].setTiempoActual(tiempoSistema+inicio);
+                    Registro.push_back(Cola[i]);
+                }
+                    
+
+                if(Cola[i].getRafaga() <= 0) {                                                                 //Elimina elementos del queue en caso de que su rafaga sea menor a 0
+                    cout<<"Tiempo de ejecucion completado: "<<Cola[i].getNombre()<<endl;
+                    
+                    Cola.erase(Cola.begin()+i);
+                    
+                }
+            }
+        }
+        TiempoActual++;
+    }
+    MostrarVector(Registro);
+
 }
 
 
@@ -79,55 +158,8 @@ int main(){
     Proceso procesoAux;  
     int q1=3,q2=8;
     Cola = CrearProcesos(10);
-    MostrarVector(Cola);
     float tiempoRR1 = 0;
-
-    while(!Cola.empty()){
-        //procesoAux = Cola.back();
-        
-        for(int i=0 ; i < Cola.size();i++){
-            
-            if(Cola[i].getLlegada() < tiempoSistema){                                                           //si el proceso ya esta dentro del sistema entonces
-
-                if(Cola[i].getRafaga() <= q1){
-                    tiempoRR1 = tiempoRR1 + Cola[i].getRafaga();                                                // si la rafaga es mas pequeña que el quantum se suma solo la rafaga remanente y se trabaja con el siguente proceso con un quantum nuevo
-                    Cola[i].setRafaga(0);
-                    RR1.push_back(Cola[i]);
-                }
-                else{
-                    tiempoRR1 = tiempoRR1 + q1;
-                    Cola[i].setRafaga(Cola[i].getRafaga()-q1);
-                    RR1.push_back(Cola[i]);
-                }
-                
-
-                if(Cola[i].getRafaga() <= 0) {                                                                 //Elimina elementos del queue en caso de que su rafaga sea menor a 0
-                    cout<<"Tiempo de ejecucion completado: "<<Cola[i].getNombre()<<endl;
-                    
-                    Cola.erase(Cola.begin()+i);
-                    
-                }
-            }
-        }
-        tiempoSistema ++;
-        
-    }
-    MostrarVector(RR1);
-    cout<<"Cantidad de iteraciones realizadas: "<<tiempoSistema<<endl;
-    cout<<"Tiempo Total De ejecucion quantum1/RR1: "<<tiempoRR1;
-    
-    
-}
-
-/*
-int main(){
-    vector<Proceso> a;
-    Proceso job1;
-    Proceso aux;
-    job1.setRafaga(2323);
-    a.push_back(job1);
-    aux = a[0];
-    cout<<")lol:"<<aux.getRafaga();
+    RoundRobin1(Cola);
+   
     return 0;
 }
-*/
