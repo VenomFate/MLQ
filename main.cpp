@@ -114,6 +114,14 @@ float menorTiempo(vector<Proceso> Cola){
     }
     return menor;
 }
+float mayorTiempo(vector<Proceso> Cola){
+    float mayor=0;
+    for(int i=0;i<Cola.size();i++){
+        if(Cola[i].getLlegada() > mayor)
+        mayor = Cola[i].getLlegada();
+    }
+    return mayor;
+}
 
 void RoundRobin(vector<Proceso> Cola, int q){
     float tiempoSistema=0;
@@ -193,16 +201,52 @@ void fcfs (vector<Proceso> Cola){
     
 }
 
+void AsignadorDeCola(vector<Proceso> Cola,vector<Proceso> *RR1,vector<Proceso> *RR2,vector<Proceso> *FCFS){     //Toma los procesos de la cola principal y 
+    float TiempoSistema = 0;
+    float TiempoMaximo = mayorTiempo(Cola);
+    while(TiempoSistema <= TiempoMaximo){
+        for(int i=0;i<Cola.size();i++){
+            if(Cola[i].getLlegada() <= TiempoSistema){
+                int prioridad = Cola[i].getPrioridad();
+                if(prioridad <= 2){                     //Toma los procesos de maximo prioridad 2
+                    RR1->push_back(Cola[i]);
+                    Cola.erase(Cola.begin()+i);
+                }
+                else{
+                    if(prioridad <= 5){                //Toma los procesos mayores a 2 pero menores a 5
+                        RR2->push_back(Cola[i]);
+                        Cola.erase(Cola.begin()+i);
+                    }
+                    else{                               //Toma los procesos restantes
+                       FCFS->push_back(Cola[i]);
+                        Cola.erase(Cola.begin()+i);
+                    }
+                }
+            }
+        }
+        TiempoSistema++;
+    }
+    
+}
+
 
 int main(){
-    vector<Proceso> Cola;         
+
+
+    
+    vector<Proceso> Cola,RR1,RR2,FCFS;         
+    
     int q1=3,q2=8;
     Cola = CrearProcesos(10);
+    AsignadorDeCola(Cola,&RR1,&RR2,&FCFS);
     cout<<"-.-.-.-.-RoundRobin Q=3-.-.-.-.-"<<endl;
-    RoundRobin(Cola,q1);
+    RoundRobin(RR1,q1);
+    cout<<"-.-.-.-.-RoundRobin Q=8-.-.-.-.-"<<endl;
+    RoundRobin(RR2,q2);
     cout<<"-.-.-.-.-FCFS Apropiativo-.-.-.-.-"<<endl;
-    fcfs(Cola); 
+    fcfs(FCFS); 
     
+
    
     return 0;
 }
