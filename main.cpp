@@ -128,27 +128,29 @@ void RoundRobin(vector<Proceso> Cola, int q){
     float TiempoActual = menorTiempo(Cola);
     float inicio = menorTiempo(Cola);
     vector<Proceso> Registro;
+    int contador=0;
     while(!Cola.empty()){
         for(int i=0 ; i < Cola.size();i++){
                 
-            if(Cola[i].getLlegada() < TiempoActual){                                                           //si el proceso ya esta dentro del sistema entonces
-
+            if(Cola[i].getLlegada() <= TiempoActual){                                                           //si el proceso ya esta dentro del sistema entonces
+                
                 if(Cola[i].getRafaga() <= q){
-                    Cola[i].setWT(tiempoSistema);
-                    tiempoSistema = tiempoSistema + Cola[i].getRafaga();                                                // si la rafaga es mas pequeña que el quantum se suma solo la rafaga remanente y se trabaja con el siguente proceso con un quantum nuevo
+                    Cola[i].setWT(TiempoActual-inicio-0.1*contador);
+                    TiempoActual = TiempoActual + Cola[i].getRafaga();                                             // si la rafaga es mas pequeña que el quantum se suma solo la rafaga remanente y se trabaja con el siguente proceso con un quantum nuevo
                     Cola[i].setRafaga(0);
-                    Cola[i].setTT(tiempoSistema);
-                    Cola[i].setTiempoActual(tiempoSistema+inicio);
+                    Cola[i].setTT(TiempoActual-inicio-0.1*contador);
+                    Cola[i].setTiempoActual(TiempoActual-0.1*contador);
                     Registro.push_back(Cola[i]);
-
+                    
                 }
                 else{
-                    Cola[i].setWT(tiempoSistema);
-                    tiempoSistema = tiempoSistema + q;
-                    Cola[i].setRafaga(Cola[i].getRafaga()-q);
-                    Cola[i].setTT(tiempoSistema);
-                    Cola[i].setTiempoActual(tiempoSistema+inicio);
+                    Cola[i].setWT(TiempoActual- inicio -0.1*contador);
+                    TiempoActual = TiempoActual + q;
+                    Cola[i].setRafaga(Cola[i].getRafaga() - q);
+                    Cola[i].setTT(TiempoActual- inicio - 0.1*contador);
+                    Cola[i].setTiempoActual(TiempoActual-0.1*contador);
                     Registro.push_back(Cola[i]);
+                    
                 }
                     
 
@@ -158,35 +160,38 @@ void RoundRobin(vector<Proceso> Cola, int q){
                     Cola.erase(Cola.begin()+i);
                     
                 }
+                
             }
+            
+             
+        
         }
-        TiempoActual++;
+        contador++;
+        TiempoActual = TiempoActual + 0.1;       
     }
     MostrarVector(Registro);
 
 }
 
-void fcfs (vector<Proceso> Cola){
+void fcfs(vector<Proceso> Cola){
     float tiempoSistema=0;
     float TiempoActual = menorTiempo(Cola);
     float inicio = menorTiempo(Cola);
     vector<Proceso> Registro;
+    int contador=0;
     while(!Cola.empty()){
         for(int i=0 ; i < Cola.size();i++){
                 
-            if(Cola[i].getLlegada() < TiempoActual){                                                           //si el proceso ya esta dentro del sistema entonces
-
+            if(Cola[i].getLlegada() <= TiempoActual){                                                           //si el proceso ya esta dentro del sistema entonces
                 
-                Cola[i].setWT(tiempoSistema);
-                tiempoSistema = tiempoSistema + Cola[i].getRafaga();                                                // si la rafaga es mas pequeña que el quantum se suma solo la rafaga remanente y se trabaja con el siguente proceso con un quantum nuevo
-                Cola[i].setRafaga(0);
-                Cola[i].setTT(tiempoSistema);
-                Cola[i].setTiempoActual(tiempoSistema+inicio);
-                Registro.push_back(Cola[i]);
-
-               
-                    
-
+                
+                    Cola[i].setWT(TiempoActual-inicio-0.1*contador);
+                    TiempoActual = TiempoActual + Cola[i].getRafaga();                                             // si la rafaga es mas pequeña que el quantum se suma solo la rafaga remanente y se trabaja con el siguente proceso con un quantum nuevo
+                    Cola[i].setRafaga(0);
+                    Cola[i].setTT(TiempoActual-inicio-0.1*contador);
+                    Cola[i].setTiempoActual(TiempoActual-0.1*contador);
+                    Registro.push_back(Cola[i]);
+                
                 if(Cola[i].getRafaga() <= 0) {                                                                 //Elimina elementos del queue en caso de que su rafaga sea menor a 0
                     cout<<"Tiempo de ejecucion completado: "<<Cola[i].getNombre()<<endl;
                     
@@ -195,11 +200,14 @@ void fcfs (vector<Proceso> Cola){
                 }
             }
         }
-        TiempoActual++;
+        contador++;
+        TiempoActual = TiempoActual + 0.1;       
     }
     MostrarVector(Registro);
-    
+
 }
+
+
 
 void AsignadorDeCola(vector<Proceso> Cola,vector<Proceso> *RR1,vector<Proceso> *RR2,vector<Proceso> *FCFS){     //Toma los procesos de la cola principal y 
     float TiempoSistema = 0;
