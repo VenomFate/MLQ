@@ -7,7 +7,7 @@ class Proceso{
 
     private:
     string nombre;
-    int rafaga; 
+    int rafaga,rafagaInicial; 
     int prioridad;
     float llegada,TT,WT,tiempoActual;
 
@@ -20,6 +20,7 @@ class Proceso{
         this->TT = 0;
         this->WT = 0;
         this->tiempoActual = 0;
+        this->rafagaInicial = 0;
     }
    
 
@@ -34,6 +35,12 @@ class Proceso{
     }
     int getRafaga(){ 
         return this->rafaga;
+    }
+    void setRafagaInicial(int rafagaInicial){
+        this->rafagaInicial = rafagaInicial;
+    }
+    int getRafagaInicial(){ 
+        return this->rafagaInicial;
     }
     void setPrioridad(int prioridad){
         this->prioridad = prioridad;
@@ -78,6 +85,7 @@ vector<Proceso> CrearProcesos(int n){           //Crea n cantidad de procesos co
         procesoAux.setNombre("Job " + to_string(nombreCont));
         nombreCont++;
         procesoAux.setRafaga(rand()%10 + rand()%10);
+        procesoAux.setRafagaInicial(procesoAux.getRafaga());
         procesoAux.setPrioridad(rand()%10);
         procesoAux.setLlegada(rand()%10 * 0.1 + (rand()%10)*(rand()%10));
         procesos.push_back(procesoAux);
@@ -89,6 +97,7 @@ void MostrarVector(vector<Proceso> Cola){
         for(int i=0; i <Cola.size();i++){
             cout<<endl<<Cola[i].getNombre()<<endl;
             cout<<"Prioridad:"<<Cola[i].getPrioridad()<<endl;
+            cout<<"Rafaga Inicial:"<<Cola[i].getRafagaInicial()<<endl;
             cout<<"Rafaga remanente:"<<Cola[i].getRafaga()<<endl;
             cout<<"Tiempo De llegada:"<<Cola[i].getLlegada()<<endl;
             cout<<"WT:"<<Cola[i].getWT()<<endl;
@@ -106,8 +115,7 @@ float menorTiempo(vector<Proceso> Cola){
     return menor;
 }
 
-void RoundRobin1(vector<Proceso> Cola){
-    int q1=3;
+void RoundRobin(vector<Proceso> Cola, int q){
     float tiempoSistema=0;
     float TiempoActual = menorTiempo(Cola);
     float inicio = menorTiempo(Cola);
@@ -117,7 +125,7 @@ void RoundRobin1(vector<Proceso> Cola){
                 
             if(Cola[i].getLlegada() < TiempoActual){                                                           //si el proceso ya esta dentro del sistema entonces
 
-                if(Cola[i].getRafaga() <= q1){
+                if(Cola[i].getRafaga() <= q){
                     Cola[i].setWT(tiempoSistema);
                     tiempoSistema = tiempoSistema + Cola[i].getRafaga();                                                // si la rafaga es mas pequeña que el quantum se suma solo la rafaga remanente y se trabaja con el siguente proceso con un quantum nuevo
                     Cola[i].setRafaga(0);
@@ -128,8 +136,8 @@ void RoundRobin1(vector<Proceso> Cola){
                 }
                 else{
                     Cola[i].setWT(tiempoSistema);
-                    tiempoSistema = tiempoSistema + q1;
-                    Cola[i].setRafaga(Cola[i].getRafaga()-q1);
+                    tiempoSistema = tiempoSistema + q;
+                    Cola[i].setRafaga(Cola[i].getRafaga()-q);
                     Cola[i].setTT(tiempoSistema);
                     Cola[i].setTiempoActual(tiempoSistema+inicio);
                     Registro.push_back(Cola[i]);
@@ -150,16 +158,51 @@ void RoundRobin1(vector<Proceso> Cola){
 
 }
 
+void fcfs (vector<Proceso> Cola){
+    float tiempoSistema=0;
+    float TiempoActual = menorTiempo(Cola);
+    float inicio = menorTiempo(Cola);
+    vector<Proceso> Registro;
+    while(!Cola.empty()){
+        for(int i=0 ; i < Cola.size();i++){
+                
+            if(Cola[i].getLlegada() < TiempoActual){                                                           //si el proceso ya esta dentro del sistema entonces
+
+                
+                Cola[i].setWT(tiempoSistema);
+                tiempoSistema = tiempoSistema + Cola[i].getRafaga();                                                // si la rafaga es mas pequeña que el quantum se suma solo la rafaga remanente y se trabaja con el siguente proceso con un quantum nuevo
+                Cola[i].setRafaga(0);
+                Cola[i].setTT(tiempoSistema);
+                Cola[i].setTiempoActual(tiempoSistema+inicio);
+                Registro.push_back(Cola[i]);
+
+               
+                    
+
+                if(Cola[i].getRafaga() <= 0) {                                                                 //Elimina elementos del queue en caso de que su rafaga sea menor a 0
+                    cout<<"Tiempo de ejecucion completado: "<<Cola[i].getNombre()<<endl;
+                    
+                    Cola.erase(Cola.begin()+i);
+                    
+                }
+            }
+        }
+        TiempoActual++;
+    }
+    MostrarVector(Registro);
+    
+}
 
 
 int main(){
-    float tiempoSistema = 0;                    //tiempo a sumar para la ejecucion del sistema
-    vector<Proceso> RR1,RR2,FCFS,Cola;         
-    Proceso procesoAux;  
+    vector<Proceso> Cola;         
     int q1=3,q2=8;
     Cola = CrearProcesos(10);
-    float tiempoRR1 = 0;
-    RoundRobin1(Cola);
+    cout<<"-.-.-.-.-RoundRobin Q=3-.-.-.-.-"<<endl;
+    RoundRobin(Cola,q1);
+    cout<<"-.-.-.-.-FCFS Apropiativo-.-.-.-.-"<<endl;
+    fcfs(Cola); 
+    
    
     return 0;
 }
