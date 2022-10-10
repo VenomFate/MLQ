@@ -22,7 +22,7 @@ class Proceso{
         this->tiempoActual = 0;
         this->rafagaInicial = 0;
     }
-   
+    ~Proceso(){}
 
     void setNombre(string nombre){
         this->nombre = nombre;
@@ -87,7 +87,7 @@ vector<Proceso> CrearProcesos(int n){           //Crea n cantidad de procesos co
         procesoAux.setRafaga(rand()%10 + rand()%10);
         procesoAux.setRafagaInicial(procesoAux.getRafaga());
         procesoAux.setPrioridad(rand()%10);
-        procesoAux.setLlegada(rand()%10 * 0.1 + (rand()%10)*(rand()%10));
+        procesoAux.setLlegada(rand()%10 * 0.1 + (rand()%10)+20);
         procesos.push_back(procesoAux);
         n--;
     }
@@ -124,7 +124,9 @@ float mayorTiempo(vector<Proceso> Cola){
 }
 
 void RoundRobin(vector<Proceso> Cola, int q){
+    cout<<"Aqui";
     float tiempoSistema=0;
+    
     float TiempoActual = menorTiempo(Cola);
     float inicio = menorTiempo(Cola);
     vector<Proceso> Registro;
@@ -135,40 +137,42 @@ void RoundRobin(vector<Proceso> Cola, int q){
             if(Cola[i].getLlegada() <= TiempoActual){                                                           //si el proceso ya esta dentro del sistema entonces
                 
                 if(Cola[i].getRafaga() <= q){
-                    Cola[i].setWT(TiempoActual-inicio-0.1*contador);
+                    
+                    Cola[i].setWT(TiempoActual-inicio);
                     TiempoActual = TiempoActual + Cola[i].getRafaga();                                             // si la rafaga es mas pequeña que el quantum se suma solo la rafaga remanente y se trabaja con el siguente proceso con un quantum nuevo
                     Cola[i].setRafaga(0);
-                    Cola[i].setTT(TiempoActual-inicio-0.1*contador);
-                    Cola[i].setTiempoActual(TiempoActual-0.1*contador);
+                    Cola[i].setTT(TiempoActual-inicio);
+                    Cola[i].setTiempoActual(TiempoActual);
                     Registro.push_back(Cola[i]);
                     
                 }
                 else{
-                    Cola[i].setWT(TiempoActual- inicio -0.1*contador);
+                    
+                    Cola[i].setWT(TiempoActual- inicio);
                     TiempoActual = TiempoActual + q;
                     Cola[i].setRafaga(Cola[i].getRafaga() - q);
-                    Cola[i].setTT(TiempoActual- inicio - 0.1*contador);
-                    Cola[i].setTiempoActual(TiempoActual-0.1*contador);
+                    Cola[i].setTT(TiempoActual- inicio);
+                    Cola[i].setTiempoActual(TiempoActual);
                     Registro.push_back(Cola[i]);
                     
                 }
                     
 
                 if(Cola[i].getRafaga() <= 0) {                                                                 //Elimina elementos del queue en caso de que su rafaga sea menor a 0
-                    cout<<"Tiempo de ejecucion completado: "<<Cola[i].getNombre()<<endl;
                     
                     Cola.erase(Cola.begin()+i);
                     
                 }
                 
             }
-            
-             
+         
         
         }
-        contador++;
-        TiempoActual = TiempoActual + 0.1;       
+        
+        //contador++;
+        //TiempoActual = TiempoActual + 0.1;       
     }
+    
     MostrarVector(Registro);
 
 }
@@ -193,8 +197,7 @@ void fcfs(vector<Proceso> Cola){
                     Registro.push_back(Cola[i]);
                 
                 if(Cola[i].getRafaga() <= 0) {                                                                 //Elimina elementos del queue en caso de que su rafaga sea menor a 0
-                    cout<<"Tiempo de ejecucion completado: "<<Cola[i].getNombre()<<endl;
-                    
+
                     Cola.erase(Cola.begin()+i);
                     
                 }
@@ -247,10 +250,14 @@ int main(){
     int q1=3,q2=8;
     Cola = CrearProcesos(10);
     AsignadorDeCola(Cola,&RR1,&RR2,&FCFS);
+    Cola.clear();
     cout<<"-.-.-.-.-RoundRobin Q=3-.-.-.-.-"<<endl;
     RoundRobin(RR1,q1);
+    RR1.clear();
     cout<<"-.-.-.-.-RoundRobin Q=8-.-.-.-.-"<<endl;
+    
     RoundRobin(RR2,q2);
+    RR2.clear();
     cout<<"-.-.-.-.-FCFS Apropiativo-.-.-.-.-"<<endl;
     fcfs(FCFS); 
     
