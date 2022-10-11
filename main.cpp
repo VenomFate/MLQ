@@ -189,12 +189,12 @@ void fcfs(vector<Proceso> Cola){
             if(Cola[i].getLlegada() <= TiempoActual){                                                           //si el proceso ya esta dentro del sistema entonces
                 
                 
-                    Cola[i].setWT(TiempoActual-inicio);
-                    TiempoActual = TiempoActual + Cola[i].getRafaga();                                             // si la rafaga es mas pequeña que el quantum se suma solo la rafaga remanente y se trabaja con el siguente proceso con un quantum nuevo
-                    Cola[i].setRafaga(0);
-                    Cola[i].setTT(TiempoActual-inicio);
-                    Cola[i].setTiempoActual(TiempoActual);
-                    Registro.push_back(Cola[i]);
+                Cola[i].setWT(TiempoActual-inicio);
+                TiempoActual = TiempoActual + Cola[i].getRafaga();                                             // si la rafaga es mas pequeña que el quantum se suma solo la rafaga remanente y se trabaja con el siguente proceso con un quantum nuevo
+                Cola[i].setRafaga(0);
+                Cola[i].setTT(TiempoActual-inicio);
+                Cola[i].setTiempoActual(TiempoActual);
+                Registro.push_back(Cola[i]);
                 
                 if(Cola[i].getRafaga() <= 0) {                                                                 //Elimina elementos del queue en caso de que su rafaga sea menor a 0
 
@@ -215,23 +215,22 @@ void AsignadorDeCola(vector<Proceso> Cola,vector<Proceso> *RR1,vector<Proceso> *
     float TiempoMaximo = mayorTiempo(Cola);
     while(TiempoSistema <= TiempoMaximo){
         for(int i=0;i<Cola.size();i++){
-            if(Cola[i].getLlegada() <= TiempoSistema){
-                int prioridad = Cola[i].getPrioridad();
-                if(prioridad <= 2){                     //Toma los procesos de maximo prioridad 2
-                    RR1->push_back(Cola[i]);
+            int prioridad = Cola[i].getPrioridad();
+            if(prioridad <= 2){                     //Toma los procesos de maximo prioridad 2
+                RR1->push_back(Cola[i]);
+                Cola.erase(Cola.begin()+i);
+            }
+            else{
+                if(prioridad <= 5){                //Toma los procesos mayores a 2 pero menores a 5
+                    RR2->push_back(Cola[i]);
                     Cola.erase(Cola.begin()+i);
                 }
-                else{
-                    if(prioridad <= 5){                //Toma los procesos mayores a 2 pero menores a 5
-                        RR2->push_back(Cola[i]);
-                        Cola.erase(Cola.begin()+i);
-                    }
-                    else{                               //Toma los procesos restantes
-                       FCFS->push_back(Cola[i]);
-                        Cola.erase(Cola.begin()+i);
-                    }
+                else{                               //Toma los procesos restantes
+                    FCFS->push_back(Cola[i]);
+                    Cola.erase(Cola.begin()+i);
                 }
             }
+            
         }
         TiempoSistema++;
     }
