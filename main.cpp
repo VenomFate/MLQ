@@ -189,11 +189,11 @@ void fcfs(vector<Proceso> Cola){
             if(Cola[i].getLlegada() <= TiempoActual){                                                           //si el proceso ya esta dentro del sistema entonces
                 
                 
-                    Cola[i].setWT(TiempoActual-inicio-0.1*contador);
+                    Cola[i].setWT(TiempoActual-inicio);
                     TiempoActual = TiempoActual + Cola[i].getRafaga();                                             // si la rafaga es mas pequeña que el quantum se suma solo la rafaga remanente y se trabaja con el siguente proceso con un quantum nuevo
                     Cola[i].setRafaga(0);
-                    Cola[i].setTT(TiempoActual-inicio-0.1*contador);
-                    Cola[i].setTiempoActual(TiempoActual-0.1*contador);
+                    Cola[i].setTT(TiempoActual-inicio);
+                    Cola[i].setTiempoActual(TiempoActual);
                     Registro.push_back(Cola[i]);
                 
                 if(Cola[i].getRafaga() <= 0) {                                                                 //Elimina elementos del queue en caso de que su rafaga sea menor a 0
@@ -202,9 +202,7 @@ void fcfs(vector<Proceso> Cola){
                     
                 }
             }
-        }
-        contador++;
-        TiempoActual = TiempoActual + 0.1;       
+        }    
     }
     MostrarVector(Registro);
 
@@ -239,7 +237,16 @@ void AsignadorDeCola(vector<Proceso> Cola,vector<Proceso> *RR1,vector<Proceso> *
     }
     
 }
+void CrearProcesoManual (vector<Proceso> *Cola ,string nombre,int rafaga, int prioridad,float llegada){
+        Proceso procesoAux;
+        procesoAux.setNombre("Job " + nombre);
+        procesoAux.setRafaga(rafaga);
+        procesoAux.setRafagaInicial(rafaga);
+        procesoAux.setPrioridad(prioridad);
+        procesoAux.setLlegada(llegada);
+        Cola->push_back(procesoAux);
 
+}
 
 int main(){
 
@@ -248,18 +255,110 @@ int main(){
     vector<Proceso> Cola,RR1,RR2,FCFS;         
     
     int q1=3,q2=8;
-    Cola = CrearProcesos(10);
-    AsignadorDeCola(Cola,&RR1,&RR2,&FCFS);
+    int opcion=0;
+    //Cola = CrearProcesos(10);                       //Crea n Procesos de manera aleatoria
+    //AsignadorDeCola(Cola,&RR1,&RR2,&FCFS);
     Cola.clear();
-    cout<<"-.-.-.-.-RoundRobin Q=3-.-.-.-.-"<<endl;
-    RoundRobin(RR1,q1);
-    RR1.clear();
-    cout<<"-.-.-.-.-RoundRobin Q=8-.-.-.-.-"<<endl;
+    int n;
+
+    string nombre;
+    int rafaga = 0;
+    int prioridad = 0;
+    float llegada = 0;
+
+f1:
+    cout << "-.-.-.-Menu-.-.-.-" << endl << "1) Agregar Proceso Manualmente" << endl << "2) Crear n Procesos aleatorios" << endl << "3) Ejecutar MLQ" << endl << "4)Mostrar Queue Actual" << endl<< "5)eliminar Queue" << endl<< "6)Salir"<< endl;
+    cout << "Escriba por consola la opcion requerida:";
+    cin >> opcion;
+    cout << endl;
+    switch(opcion){
+        case 1:
+            
+            cout<<"Ingrese el nombre del proceso:";
+            cin>>nombre; cout<<endl;
+            cout<<"Ingrese la rafaga inicial del proceso:";
+            cin>>rafaga;
+            cout<<"Ingrese la prioridad del proceso:";
+            cin>>prioridad;
+            cout<<"Ingrese el tiempo de llegada del proceso(flotante):";
+            cin>>llegada;
+            CrearProcesoManual(&Cola,nombre,rafaga,prioridad,llegada);
+            system("PAUSE");
+            system("cls");
+            goto f1;
+        break;
+
+        case 2:
+            cout << "Ingrese la cantiada de procesos a ingresar:";
+            cin >> n;
+            Cola.clear();
+            Cola = CrearProcesos(n);
+            cout << endl << "Se borro la cola anterior y se crearon " << n <<" Procesos y se ingresaron en Queue"<< endl;
+            system("PAUSE");
+            system("cls");
+            goto f1;
+        break;
+
+        case 3:
+            AsignadorDeCola(Cola,&RR1,&RR2,&FCFS);
+            if(!RR1.empty()){
+                cout<<"-.-.-.-.-RoundRobin Q=3-.-.-.-.-"<<endl;
+                RoundRobin(RR1,q1);
+                RR1.clear();
+            }
+            else{
+                cout<<"-.-.-.-.-RoundRobin Q=3 VACIO-.-.-.-.-"<<endl;
+            }
+
+            if(!RR2.empty()){
+                cout<<"-.-.-.-.-RoundRobin Q=8-.-.-.-.-"<<endl;
+                RoundRobin(RR2,q2);
+                RR2.clear();
+            }
+            else{
+                cout<<"-.-.-.-.-RoundRobin Q=8 VACIO-.-.-.-.-"<<endl;
+            }
+            if(!FCFS.empty()){
+                cout<<"-.-.-.-.-FCFS Apropiativo-.-.-.-.-"<<endl;
+                fcfs(FCFS);
+                FCFS.clear();
+            }
+            else{
+                cout<<"-.-.-.-.-FCFS Apropiativo VACIO-.-.-.-.-"<<endl;
+            }
+            
+
+
+            system("PAUSE");
+            system("cls");
+            goto f1;
+        break;
+
+        case 4:
+            MostrarVector(Cola);
+            system("PAUSE");
+            system("cls");
+            goto f1;
+        break;
+
+        case 5:
+            Cola.clear();
+            cout<<"Se Limpio el Queue"<<endl;
+            goto f1;
+        break;
+
+        case 6:
+
+        break;
+        default:
+            cout<<endl<<"Ingrese una opcion valida"<<endl;
+            system("PAUSE");
+            system("cls");
+            goto f1;
+        break;
+
+    }
     
-    RoundRobin(RR2,q2);
-    RR2.clear();
-    cout<<"-.-.-.-.-FCFS Apropiativo-.-.-.-.-"<<endl;
-    fcfs(FCFS); 
     
 
    
